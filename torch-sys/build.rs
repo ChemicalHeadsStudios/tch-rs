@@ -43,7 +43,7 @@ fn normalize_path(in_path: &PathBuf) -> PathBuf {
             use normpath::PathExt;
             // Normalize the path to get rid of any relative paths,
             // then use the Windows extended-length path to get around the 260 char path limit.
-            path = in_path.normalize_virtually()?.as_path().to_verbatim();
+            path = in_path.normalize_virtually().unwrap().as_path().to_verbatim();
         }
     }
     return path;
