@@ -35,6 +35,20 @@ fn download<P: AsRef<Path>>(source_url: &str, target_file: P) -> anyhow::Result<
     }
 }
 
+// Fixes up the path to workaround the 260 char limit on Windows, and normalizes any relative paths.
+fn normalize_path(in_path: &PathBuf) -> PathBuf {
+    let mut path: PathBuf = in_path.to_verbatim();
+    cfg_if::cfg_if! {
+        if #[cfg(any(windows))] {
+            use normpath::PathExt;
+            // Normalize the path to get rid of any relative paths,
+            // then use the Windows extended-length path to get around the 260 char path limit.
+            path = in_path.normalize_virtually()?.as_path().to_verbatim();
+        }
+    }
+    return path;
+}
+
 fn extract<P: AsRef<Path>>(filename: P, outpath: P) -> anyhow::Result<()> {
     let file = fs::File::open(&filename)?;
     let buf = io::BufReader::new(file);
@@ -53,28 +67,13 @@ fn extract<P: AsRef<Path>>(filename: P, outpath: P) -> anyhow::Result<()> {
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
                     #[allow(clippy::unused_mut)]
-                    let mut path: PathBuf = p.to_verbatim();
-                    cfg_if::cfg_if! {
-                        if #[cfg(any(windows))] {
-                            use normpath::PathExt;
-                            // Normalize the path to get rid of any relative paths,
-                            // then use the Windows extended-length path to get around the 260 char path limit.
-                            path = p.normalize_virtually()?.as_path().to_verbatim();
-                        }
-                    }
-                    fs::create_dir_all(path)?;
+                    fs::create_dir_all(normalize_path(&PathBuf::from(p)))?;
                 }
             }
 
             use normpath::PathExt;
 
-            let mut outfile = fs::File::create(
-                outpath
-                    .normalize_virtually()
-                    .unwrap()
-                    .as_path()
-                    .to_verbatim(),
-            )?;
+            let mut outfile = fs::File::create(normalize_path(&outpath))?;
             io::copy(&mut file, &mut outfile)?;
         }
     }
