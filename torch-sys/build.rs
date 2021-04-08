@@ -70,9 +70,6 @@ fn extract<P: AsRef<Path>>(filename: P, outpath: P) -> anyhow::Result<()> {
                     fs::create_dir_all(normalize_path(&PathBuf::from(p)))?;
                 }
             }
-
-            use normpath::PathExt;
-
             let mut outfile = fs::File::create(normalize_path(&outpath))?;
             io::copy(&mut file, &mut outfile)?;
         }
