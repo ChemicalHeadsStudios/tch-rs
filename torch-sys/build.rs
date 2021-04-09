@@ -37,6 +37,7 @@ fn download<P: AsRef<Path>>(source_url: &str, target_file: P) -> anyhow::Result<
 
 // Fixes up the path to workaround the 260 char limit on Windows, and normalizes any relative paths.
 fn normalize_path(in_path: &PathBuf) -> PathBuf {
+    #[allow(unused_mut)]
     let mut path: PathBuf = in_path.to_verbatim();
     cfg_if::cfg_if! {
         if #[cfg(any(windows))] {
@@ -66,7 +67,6 @@ fn extract<P: AsRef<Path>>(filename: P, outpath: P) -> anyhow::Result<()> {
             );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    #[allow(clippy::unused_mut)]
                     fs::create_dir_all(normalize_path(&PathBuf::from(p)))?;
                 }
             }
