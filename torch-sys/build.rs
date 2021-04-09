@@ -109,7 +109,7 @@ fn prepare_libtorch_dir() -> PathBuf {
     if let Ok(libtorch) = env_var_rerun("LIBTORCH") {
         PathBuf::from(libtorch)
     } else {
-        let libtorch_dir = PathBuf::from(env::var("LIBTORCH_OUT_DIR").unwrap()).join("libtorch");
+        let libtorch_dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("libtorch");
         if !libtorch_dir.exists() {
             fs::create_dir(&libtorch_dir).unwrap_or_default();
             let libtorch_url = match os.as_str() {
