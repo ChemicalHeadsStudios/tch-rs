@@ -37,7 +37,7 @@ fn download<P: AsRef<Path>>(source_url: &str, target_file: P) -> anyhow::Result<
 
 // Fixes up the path to workaround the 260 char limit on Windows, and normalizes any relative paths.
 fn normalize_path(in_path: &PathBuf) -> PathBuf {
-    #[allow(unused_mut)]
+    #[allow(unused_mut, unused_assignments)]
     let mut path: PathBuf = in_path.to_verbatim();
     cfg_if::cfg_if! {
         if #[cfg(any(windows))] {
