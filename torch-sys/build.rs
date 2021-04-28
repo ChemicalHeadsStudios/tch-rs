@@ -85,26 +85,27 @@ fn env_var_rerun(name: &str) -> Result<String, env::VarError> {
 fn prepare_libtorch_dir() -> PathBuf {
     let os = env::var("CARGO_CFG_TARGET_OS").expect("Unable to get TARGET_OS");
 
-    let device = match env_var_rerun("TORCH_CUDA_VERSION") {
-        Ok(cuda_env) => match os.as_str() {
-            "linux" | "windows" => cuda_env
-                .trim()
-                .to_lowercase()
-                .trim_start_matches("cu")
-                .split('.')
-                .take(2)
-                .fold("cu".to_owned(), |mut acc, curr| {
-                    acc += curr;
-                    acc
-                }),
-            os_str => panic!(
-                "CUDA was specified with `TORCH_CUDA_VERSION`, but pre-built \
-                 binaries with CUDA are only available for Linux and Windows, not: {}.",
-                os_str
-            ),
-        },
-        Err(_) => "cpu".to_owned(),
-    };
+    let device = "cu102";
+    // let device = match env_var_rerun("TORCH_CUDA_VERSION") {
+    //     Ok(cuda_env) => match os.as_str() {
+    //         "linux" | "windows" => cuda_env
+    //             .trim()
+    //             .to_lowercase()
+    //             .trim_start_matches("cu")
+    //             .split('.')
+    //             .take(2)
+    //             .fold("cu".to_owned(), |mut acc, curr| {
+    //                 acc += curr;
+    //                 acc
+    //             }),
+    //         os_str => panic!(
+    //             "CUDA was specified with `TORCH_CUDA_VERSION`, but pre-built \
+    //              binaries with CUDA are only available for Linux and Windows, not: {}.",
+    //             os_str
+    //         ),
+    //     },
+    //     Err(_) => "cpu".to_owned(),
+    // };
 
     if let Ok(libtorch) = env_var_rerun("LIBTORCH") {
         PathBuf::from(libtorch)
@@ -119,7 +120,7 @@ fn prepare_libtorch_dir() -> PathBuf {
                         "cpu" => "%2Bcpu",
                         "cu92" => "%2Bcu92",
                         "cu101" => "%2Bcu101",
-                        "cu110" => "%2Bcu110",
+                        "cu110" => "",
                         _ => ""
                     }
                 ),
@@ -151,7 +152,7 @@ fn prepare_libtorch_dir() -> PathBuf {
 fn make<P: AsRef<Path>>(libtorch: P, use_cuda: bool, use_hip: bool) {
     let os = env::var("CARGO_CFG_TARGET_OS").expect("Unable to get TARGET_OS");
 
-    let cuda_dependency = if use_cuda || use_hip {
+    let cuda_dependency = if true || use_hip {
         "libtch/dummy_cuda_dependency.cpp"
     } else {
         "libtch/fake_cuda_dependency.cpp"
@@ -218,14 +219,22 @@ fn main() {
         // This will be available starting from cargo 1.50 but will be a nightly
         // only option to start with.
         // https://github.com/rust-lang/cargo/blob/master/CHANGELOG.md
-        let use_cuda = libtorch.join("lib").join("libtorch_cuda.so").exists()
-            || libtorch.join("lib").join("torch_cuda.dll").exists();
-        let use_cuda_cu = libtorch.join("lib").join("libtorch_cuda_cu.so").exists()
-            || libtorch.join("lib").join("torch_cuda_cu.dll").exists();
-        let use_cuda_cpp = libtorch.join("lib").join("libtorch_cuda_cpp.so").exists()
-            || libtorch.join("lib").join("torch_cuda_cpp.dll").exists();
-        let use_hip = libtorch.join("lib").join("libtorch_hip.so").exists()
-            || libtorch.join("lib").join("torch_hip.dll").exists();
+
+        // Ignore CUDA detection and force regular CUDA
+        // let use_cuda = libtorch.join("lib").join("libtorch_cuda.so").exists()
+        //     || libtorch.join("lib").join("torch_cuda.dll").exists();
+        // let use_cuda_cu = libtorch.join("lib").join("libtorch_cuda_cu.so").exists()
+        //     || libtorch.join("lib").join("torch_cuda_cu.dll").exists();
+        // let use_cuda_cpp = libtorch.join("lib").join("libtorch_cuda_cpp.so").exists()
+        //     || libtorch.join("lib").join("torch_cuda_cpp.dll").exists();
+        // let use_hip = libtorch.join("lib").join("libtorch_hip.so").exists()
+        //     || libtorch.join("lib").join("torch_hip.dll").exists();
+
+        let use_cuda = true;
+        let use_cuda_cu = false;
+        let use_cuda_cpp = false;
+        let use_hip = false;
+
         println!(
             "cargo:rustc-link-search=native={}",
             libtorch.join("lib").display()

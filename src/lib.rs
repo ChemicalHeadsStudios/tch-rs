@@ -5,6 +5,7 @@ extern crate libc;
 extern crate thiserror;
 extern crate zip;
 
+pub use torch_sys::dummy_cuda_dependency;
 pub mod data;
 
 mod error;
