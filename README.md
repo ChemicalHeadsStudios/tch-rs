@@ -1,4 +1,5 @@
-# tch-rs
+# tch-rs (ChenicalHeads fork with Windows specific fixes)
+
 Rust bindings for the C++ api of PyTorch. The goal of the `tch` crate is to
 provide some thin wrappers around the C++ PyTorch api (a.k.a. libtorch). It
 aims at staying as close as possible to the original C++ api. More idiomatic
